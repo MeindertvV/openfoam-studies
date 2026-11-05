@@ -1,0 +1,49 @@
+# Specificatie van de studie. Vul alles in voordat de case wordt aangepast.
+titel: "pitzDaily proefrun"
+doel: "De hele keten testen met de ongewijzigde tutorial pitzDailySteady"
+
+fysica:
+  stroming: incompressibel      # incompressibel | compressibel
+  tijd: stationair              # stationair | transient
+  turbulentiemodel: kEpsilon    # bv. kOmegaSST, kEpsilon, laminar
+  solver: incompressibleFluid   # foamRun-module, bv. incompressibleFluid
+
+geometrie:
+  beschrijving: "2D achterwaartse stap met convergerende uitlaat"
+  meshmethode: blockMesh        # blockMesh | snappyHexMesh | gmsh
+  mesh_stappen: []              # commando's in volgorde; leeg = automatisch uit system/
+
+randvoorwaarden:                # per patch
+  inlet: {U: "fixedValue (10 0 0)", p: zeroGradient, k: "fixedValue 0.375", epsilon: "fixedValue 14.855"}
+  outlet: {U: zeroGradient, p: "fixedValue 0", k: zeroGradient, epsilon: zeroGradient}
+  upperWall: {U: noSlip, p: zeroGradient, k: kqRWallFunction, epsilon: epsilonWallFunction}
+  lowerWall: {U: noSlip, p: zeroGradient, k: kqRWallFunction, epsilon: epsilonWallFunction}
+  frontAndBack: {U: empty, p: empty, k: empty, epsilon: empty}
+
+stofeigenschappen:
+  nu: 1.0e-5                    # m2/s
+  rho: null                     # kg/m3; incompressibel, p is kinematisch
+
+looptijd:
+  endTime: 2000
+  deltaT: 1
+  smoke_iteraties: 100
+
+output:
+  forces: []                    # patches; niet in de tutorial
+  probes: []                    # punten
+  velden: [U, p]
+
+mesh_drempels:
+  maxNonOrtho: 70               # graden, standaardgrens van checkMesh
+  maxSkewness: 4                # standaardgrens van checkMesh
+  doel_yPlus: null              # controleren na de run, niet in check_mesh.py
+
+convergentie: "residualControl uit de tutorial: p < 1e-2, U, k en epsilon < 1e-3, gehaald voor endTime"
+acceptatie: "Keten draait foutloos: mesh voldoet aan de drempels, solver eindigt met End, residuen dalen, PNG's zijn aangemaakt"
+
+rekenplek:
+  plek: azure                   # lokaal | azure
+  cores: 4
+  nodes: 1
+  walltime: "00:20:00"

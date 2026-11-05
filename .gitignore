@@ -1,0 +1,38 @@
+# Geheimen en lokale instellingen
+.env
+.azjob
+.claude/settings.local.json
+
+# Bestaande cases en builds buiten de repo
+/run/
+/platforms/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Parallel en tijdmappen (0/ en 0.orig/ blijven)
+processor*/
+/studies/*/case/[1-9]*/
+/studies/*/case/0.[0-9]*/
+/studies/*/smoke/
+
+# Gegenereerde mesh
+/studies/*/case/constant/polyMesh/
+
+# Logs en jobbestanden
+log.*
+logs/
+*.log
+slurm-*.out
+/studies/*/job*.sbatch
+
+# OpenFOAM-uitvoer
+postProcessing/
+dynamicCode/
+*.foam
+*.vtk
+*.vtp
+*.vtu
+*.tgz

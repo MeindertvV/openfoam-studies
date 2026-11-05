@@ -1,0 +1,45 @@
+# Specificatie van de studie. Vul alles in voordat de case wordt aangepast.
+titel: ""
+doel: ""
+
+fysica:
+  stroming: incompressibel      # incompressibel | compressibel
+  tijd: stationair              # stationair | transient
+  turbulentiemodel: ""          # bv. kOmegaSST, kEpsilon, laminar
+  solver: ""                    # foamRun-module, bv. incompressibleFluid
+
+geometrie:
+  beschrijving: ""
+  meshmethode: ""               # blockMesh | snappyHexMesh | gmsh
+  mesh_stappen: []              # commando's in volgorde; leeg = automatisch uit system/
+
+randvoorwaarden:                # per patch
+  # inlet: {U: "fixedValue (10 0 0)", p: zeroGradient}
+
+stofeigenschappen:
+  nu: null                      # m2/s
+  rho: null                     # kg/m3
+
+looptijd:
+  endTime: null
+  deltaT: null
+  smoke_iteraties: 100
+
+output:
+  forces: []                    # patches
+  probes: []                    # punten
+  velden: [U, p]
+
+mesh_drempels:
+  maxNonOrtho: 70               # graden, standaardgrens van checkMesh
+  maxSkewness: 4                # standaardgrens van checkMesh
+  doel_yPlus: null              # controleren na de run, niet in check_mesh.py
+
+convergentie: ""                # bv. alle residuen < 1e-4 en Cd binnen 1% over 200 iteraties
+acceptatie: ""                  # meetbaar criterium voor rapport.md
+
+rekenplek:
+  plek: lokaal                  # lokaal | azure
+  cores: 1
+  nodes: 1
+  walltime: "01:00:00"

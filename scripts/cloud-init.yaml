@@ -1,0 +1,46 @@
+#cloud-config
+package_update: true
+packages:
+  - rsync
+  - munge
+  - slurm-wlm
+  - xvfb
+  - libgl1-mesa-dri
+  - python3-numpy
+  - python3-matplotlib
+
+write_files:
+  - path: /usr/local/bin/setup-slurm.sh
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # Een machine die zowel Slurm-controller als rekennode is
+      set -eu
+      host=$(hostname -s)
+      node=$(slurmd -C | head -1)
+      cat > /etc/slurm/slurm.conf <<EOF
+      ClusterName=ofjob
+      SlurmctldHost=$host
+      AuthType=auth/munge
+      SlurmUser=slurm
+      StateSaveLocation=/var/spool/slurmctld
+      SlurmdSpoolDir=/var/spool/slurmd
+      ProctrackType=proctrack/linuxproc
+      TaskPlugin=task/none
+      SelectType=select/cons_tres
+      SelectTypeParameters=CR_Core
+      ReturnToService=2
+      $node State=UNKNOWN
+      PartitionName=hpc Nodes=$host Default=YES MaxTime=INFINITE State=UP
+      EOF
+      mkdir -p /var/spool/slurmctld /var/spool/slurmd
+      chown slurm /var/spool/slurmctld
+      systemctl enable munge slurmctld slurmd
+      systemctl restart munge slurmctld slurmd
+
+runcmd:
+  - wget -O /etc/apt/trusted.gpg.d/openfoam.asc https://dl.openfoam.org/gpg.key
+  - add-apt-repository -y http://dl.openfoam.org/ubuntu
+  - apt-get update
+  - apt-get install -y openfoam11
+  - /usr/local/bin/setup-slurm.sh

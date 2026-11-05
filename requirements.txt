@@ -1,0 +1,4 @@
+foamlib
+numpy
+matplotlib
+pyyaml
