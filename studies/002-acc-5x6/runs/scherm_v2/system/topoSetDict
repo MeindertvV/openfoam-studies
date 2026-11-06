@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Bundels als cellZone op celmiddelpunt: geen snapping, dus trapjes maar
+// goede cellen. Werkt ongewijzigd voor meer units.
+
+actions
+(
+    {
+        name    screenCells;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        box     (-0.76 -37.8 5.0) (0.74 37.8 44.25);
+    }
+    {
+        name    screenCells;
+        type    cellSet;
+        action  add;
+        source  boxToCell;
+        box     (-31.5 -0.76 5.0) (31.5 0.74 44.25);
+    }
+    {
+        name    screenCells;
+        type    cellSet;
+        action  add;
+        source  boxToCell;
+        box     (-1.6 -37.8 5.0) (-1.4 37.8 9.0);
+    }
+    {
+        name    screenCells;
+        type    cellSet;
+        action  add;
+        source  boxToCell;
+        box     (-31.5 -1.6 5.0) (31.5 -1.4 9.0);
+    }
+    {
+        name    screen;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        set     screenCells;
+    }
+);
+
+// ************************************************************************* //

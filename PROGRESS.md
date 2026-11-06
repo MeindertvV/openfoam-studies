@@ -1,12 +1,12 @@
 # PROGRESS
 
-## Lopend: studies/002-acc-5x6 (wind en scherm niet stabiel, VM verwijderd)
+## Lopend: studies/002-acc-5x6 (drie cases af, VM verwijderd)
 - Rapport: `studies/002-acc-5x6/rapport.md`. Fix-log in `NOTES.md`.
-- Windstil af op 4M: balans -1,43%, 503 m3/s gemiddeld; `runs/windstil/windstil.foam`. Wind alleen tussenstand t=300 in `runs/wind/wind.foam`.
-- Wind ontspoort boven de windzijde, rond (-38, 4, 72), waarschijnlijk door hoge inlaat-nut in fijne cellen. Niet bewezen.
-- Volgende stap: lokaal op 1,28M inlaat-k begrenzen of maxCo verlagen. De 1,28M-mesh stond in de scratchpad; maak hem zo nodig opnieuw met `scripts/mesh.sh`.
-- Azure-budget van de gebruiker ($15 totaal) is op: ~€12,60 besteed. Nieuwe run vraagt nieuw budget.
-- Bewaking moet op jobstatus sturen, niet op `FOAM FATAL`. Een geweigerde opdracht kan toch deels gedraaid hebben: controleer dat op de VM.
+- `runs/wind_v2` en `runs/scherm_v2` op 4M, t=1200: 12.527 en 13.324 m3/s (windstil 15.103). Inlaat-nut begrensd op 5 m2/s. Oude `runs/wind` en `runs/scherm` blijven staan.
+- Warmtebalans wind -5,26%, scherm -4,15%: criterium 2% niet gehaald. Convergentie niet volledig aangetoond (zie rapport).
+- Azure: laatste run ~EUR 4,40 van $10. `az` staat in `~/.local/bin`; quota 64 vCPU in westeurope, 10 in swedencentral. Nieuwe run vraagt nieuw budget.
+- `mkRuns.py` wist bestaande `runs/`-mappen: niet zomaar opnieuw draaien.
+- Volgende stap: warmtebalans verbeteren of K van het scherm variëren.
 
 ## Eerder: studies/001-acc-aframe (fase 6, wacht op visuele meshcontrole)
 - Een A-frame-unit, fluid-module met Boussinesq, kEpsilon. Roadmap: daarna 5x6-grid (`nx`,`ny` in `mkGeometry.py`, lijst `fans` in `fvModels`), dan wind en windschermen.
