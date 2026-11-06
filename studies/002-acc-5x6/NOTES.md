@@ -44,3 +44,6 @@
 | 2026-11-05 | 33 | post scherm | hpc | 1 | 1 | 01:00:00 |
 | 2026-11-06 | 34-38 | diagnose wind (mislukt: 34-37 ph_rgh of functie-instelling, 38 tot iteratie 345 zonder ontsporing) | hpc | 1 | 16 | 00:20:00 |
 | 2026-11-06 | 39 | diagnose wind tot iteratie 385 | hpc | 1 | 16 | 00:20:00 |
+
+## Lokale testen
+`lokaal/wind_basis`: instellingen van job 30 op 1,28M. `lokaal/wind_nut`: idem, inlaat-nut begrensd op 5 m2/s via epsilon. Lopen; uitkomst komt in `rapport.md`.

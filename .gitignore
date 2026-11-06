@@ -38,7 +38,6 @@ slurm-*.out
 # OpenFOAM-uitvoer
 postProcessing/
 dynamicCode/
-*.foam
 *.vtk
 *.vtp
 *.vtu
