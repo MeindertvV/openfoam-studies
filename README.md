@@ -1,4 +1,5 @@
 # OpenFOAM-studies
+<img width="1302" height="762" alt="afbeelding" src="https://github.com/user-attachments/assets/49b840a2-a1c1-4904-aa90-7a4c42ff21ac" />
 
 Werkomgeving voor OpenFOAM-studies: kleine tests lokaal in WSL, meshing en runs op een tijdelijke Azure-VM met Slurm, post-processing headless. Regels en fases staan in [CLAUDE.md](CLAUDE.md), de stand van zaken in [PROGRESS.md](PROGRESS.md).
 
