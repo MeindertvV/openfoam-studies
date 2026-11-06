@@ -1,0 +1,8 @@
+tijd 1000: controlebox, 37084 vlakken
+  massa in 22441.6, uit 22440.3, netto -1.383 kg/s
+  T in 288.17 K, T uit 304.34 K
+  Q lucht 364.958 MW
+  bundleL: |Un| gem 1.94, max 3.01 m/s, tangentieel gem 0.08 m/s, debiet 5577.8 m3/s
+  bundleR: |Un| gem 1.94, max 3.03 m/s, tangentieel gem 0.08 m/s, debiet 5574.4 m3/s
+  debiet bundels 11152.3 m3/s, Q bundels 370.251 MW, balansfout -1.43 %
+  p_rgh plenum 132.8 Pa, buiten bundel 9.5 Pa, verschil 123.2 Pa

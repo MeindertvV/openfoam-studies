@@ -20,6 +20,13 @@ processor*/
 
 # Gegenereerde mesh
 /studies/*/case/constant/polyMesh/
+/studies/*/runs/*/constant/polyMesh/
+/studies/*/runs/*/[1-9]*/
+/studies/*/lokaal/*/constant/polyMesh/
+/studies/*/kalibratie/constant/polyMesh/
+/studies/*/kalibratie/[1-9]*/
+/studies/*/lokaal/*/[1-9]*/
+dynamicCode/
 
 # Logs en jobbestanden
 log.*
@@ -36,3 +43,4 @@ dynamicCode/
 *.vtp
 *.vtu
 *.tgz
+/studies/*/vm_backup/

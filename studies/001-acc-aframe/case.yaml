@@ -1,0 +1,64 @@
+# Specificatie van de studie. Vul alles in voordat de case wordt aangepast.
+titel: "acc-aframe"
+doel: "Een A-frame luchtkoeler (ACC) met fan: fan-werkpunt, warmteafvoer en luchtstroom. Basis voor 5x6-grid en wind/windschermen."
+
+fysica:
+  stroming: compressibel        # perfectGas, drijfkracht meegenomen
+  tijd: stationair              # pseudo-stationair met lokale tijdstap
+  turbulentiemodel: kEpsilon
+  solver: fluid
+
+geometrie:
+  beschrijving: "Eén unit 12,6x12,6 m op 45 m hoog: dek met fan D 9,1 m (naaf 3 m), plenumwand tot 48 m, twee bundels van ~10 m onder 60 graden tophoek, nok tot ~57 m. Bundeldikte 0,5 m, domein 192x192x144 m. Aanname: generiek, geen echte installatie."
+  meshmethode: snappyHexMesh
+  mesh_stappen: ["python3 mkGeometry.py", "blockMesh", "surfaceFeatures", "snappyHexMesh -overwrite", "topoSet"]
+
+randvoorwaarden:                # per patch
+  ground: {U: noSlip, T: zeroGradient}
+  structure: {U: noSlip, T: zeroGradient}
+  sides: {U: pressureInletOutletVelocity, p_rgh: prghTotalHydrostaticPressure, ph_rgh: fixedFluxPressure, T: "inletOutlet 288"}
+  top: {U: pressureInletOutletVelocity, p_rgh: prghTotalHydrostaticPressure, ph_rgh: "fixedValue 0", T: "inletOutlet 288"}
+
+fan:                            # aannames, generiek
+  curve: "dp = 250*(1-(Q/800)^2) Pa, Q in m3/s"
+  ontwerp: "Q ~ 500 m3/s, dp ~ 150 Pa"
+  swirl: "Euler, Omega 7 rad/s"
+
+warmte:
+  Tstoom: 323                   # K
+  Tlucht: 288                   # K
+  htc_Av: 8100                  # W/m3/K, gekalibreerd op ~12 MW per fan
+
+bundel:
+  f_normaal: 84                 # 1/m, gekalibreerd op gemeten drukval
+  f_dwars: 840                  # 1/m
+  dikte: 0.5                    # m, verdikt van ~0,22 m
+
+stofeigenschappen:
+  nu: 1.47e-5                   # m2/s
+  rho: 1.21                     # kg/m3 bij 288 K en 1 bar, perfectGas
+
+looptijd:
+  endTime: 3000
+  deltaT: 1
+  smoke_iteraties: 100
+
+output:
+  forces: []                    # patches
+  # eigen: fan Q en dp staan in de log
+  probes: []                    # punten
+  velden: [U, p, p_rgh, T]
+
+mesh_drempels:
+  maxNonOrtho: 70               # graden, standaardgrens van checkMesh
+  maxSkewness: 4                # standaardgrens van checkMesh
+  doel_yPlus: null              # controleren na de run, niet in check_mesh.py
+
+convergentie: "Residuen vlak en warmteafvoer stabiel binnen 1% over 200 iteraties"
+acceptatie: "Eén unit, windstil: warmtebalans (bundels vs lucht) sluit binnen 2%; fan-debiet binnen 10% van 500 m3/s."
+
+rekenplek:
+  plek: lokaal                  # lokaal | azure
+  cores: 1
+  nodes: 1
+  walltime: "01:00:00"

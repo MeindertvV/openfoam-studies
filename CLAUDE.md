@@ -5,8 +5,6 @@ Kleine tests draaien lokaal in WSL. Meshing en CFD-runs draaien op een tijdelijk
 Lees bij een nieuwe of onderbroken sessie eerst `PROGRESS.md` en ga daar verder. Wees zuinig: geen lange uitleg, alleen wat de gebruiker moet weten of beslissen.
 
 ## Harde regels
-- Op Azure niets uitvoeren dat geld kost of iets wijzigt: geen sbatch, geen scancel, geen az create/delete/scale, geen verwijderen op remote storage. Scripts hiervoor schrijven mag. Uitvoeren alleen na een expliciet "ja" van de gebruiker.
-- Eén "ja" geldt voor één job, met het getoonde VM-type, de getoonde uren en het getoonde budget: aanmaken, syncen, submitten, ophalen en verwijderen. Alles daarbuiten, zoals langer rekenen of een groter VM-type, vraagt een nieuw "ja".
 - Noem vóór elke job het maximale budget in euro's. Laat na een job nooit een VM staan: `scripts/az_down.sh` hoort bij elke job.
 - Geen keys, wachtwoorden, IP's of hostnamen in bestanden die in git komen. Gebruik `.env` (in `.gitignore`) plus `.env.example`.
 - Niets overschrijven wat al in deze map staat zonder te vragen. `run/` en `platforms/` zijn bestaand werk en blijven onaangeroerd.
@@ -39,3 +37,4 @@ In v11 zijn `simpleFoam` en `pimpleFoam` alleen doorverwijzingen. Gebruik `foamR
 - Bij een fout: los de EERSTE fout in de log op, niet de vervolgfouten.
 - Elke fix komt in het fix-log van `NOTES.md`: symptoom | oorzaak | wijziging | verificatie.
 - Nooit een case vanaf nul schrijven als er een passende tutorial is.
+- Elke case en rundir krijgt een `.foam`-bestand voor ParaView, ook kopieën, varianten en opgehaalde resultaten. `new_study.sh`, `mesh.sh` en `smoke.sh` doen dit zelf; noem het pad aan de gebruiker.

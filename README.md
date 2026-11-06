@@ -2,6 +2,14 @@
 
 Werkomgeving voor OpenFOAM-studies: kleine tests lokaal in WSL, meshing en runs op een tijdelijke Azure-VM met Slurm, post-processing headless. Regels en fases staan in [CLAUDE.md](CLAUDE.md), de stand van zaken in [PROGRESS.md](PROGRESS.md).
 
+## Studies
+| Studie | Inhoud | Stand |
+|---|---|---|
+| [001-acc-aframe](studies/001-acc-aframe/rapport.md) | Enkel A-frame met fan, 229k cellen | Af |
+| [002-acc-5x6](studies/002-acc-5x6/rapport.md) | 5x6 grid, 4M cellen, windstil, wind, scherm | Windstil af; wind en scherm niet stabiel |
+
+Werkwijze en fixes per studie staan in `NOTES.md`, de runinstellingen in `case/`, `runs/` en `mkRuns.py`. Velden en meshes staan niet in git.
+
 ## Installatie
 ```bash
 cp .env.example .env

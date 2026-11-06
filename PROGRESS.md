@@ -1,5 +1,20 @@
 # PROGRESS
 
+## Lopend: studies/002-acc-5x6 (wind en scherm niet stabiel, VM verwijderd)
+- Rapport: `studies/002-acc-5x6/rapport.md`. Fix-log in `NOTES.md`.
+- Windstil af op 4M: balans -1,43%, 503 m3/s gemiddeld; `runs/windstil/windstil.foam`. Wind alleen tussenstand t=300 in `runs/wind/wind.foam`.
+- Wind ontspoort boven de windzijde, rond (-38, 4, 72), waarschijnlijk door hoge inlaat-nut in fijne cellen. Niet bewezen.
+- Volgende stap: lokaal op 1,28M inlaat-k begrenzen of maxCo verlagen. De 1,28M-mesh stond in de scratchpad; maak hem zo nodig opnieuw met `scripts/mesh.sh`.
+- Azure-budget van de gebruiker ($15 totaal) is op: ~€12,60 besteed. Nieuwe run vraagt nieuw budget.
+- Bewaking moet op jobstatus sturen, niet op `FOAM FATAL`. Een geweigerde opdracht kan toch deels gedraaid hebben: controleer dat op de VM.
+
+## Eerder: studies/001-acc-aframe (fase 6, wacht op visuele meshcontrole)
+- Een A-frame-unit, fluid-module met Boussinesq, kEpsilon. Roadmap: daarna 5x6-grid (`nx`,`ny` in `mkGeometry.py`, lijst `fans` in `fvModels`), dan wind en windschermen.
+- Baseline `fluid/hotRoomBoussinesqSteady` draaide ongewijzigd (10 iteraties).
+- Mesh 229488 cellen, maxNonOrtho 42, skewness 2,4; door de gebruiker goedgekeurd. check_mesh.py exit 1 door concave cellen, zie NOTES.
+- Run lokaal in `smoke/` (1500 iteraties, lokale tijdstap): Q 583 m3/s, dp 117 Pa, 9,50 MW. Criterium Q niet gehaald, warmtebalans niet aangetoond. Details in NOTES.
+- Volgende stap: warmtebalans meten over een vlak bij de bundels (randmeting onbruikbaar), fancurve of f bijstellen naar 500 m3/s, veldplaatjes, rapport.md. Daarna 5x6.
+
 ## Status
 - Fase 0 (inventaris): af.
 - Fase 1 (repo-structuur): af.

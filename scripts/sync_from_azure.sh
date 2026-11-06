@@ -22,6 +22,7 @@ filters=(
     --include='log.*'
     --include='slurm-*.out'
     --include='/case/postProcessing/***'
+    --include='/runs/*/postProcessing/***'
     --exclude='*'
 )
 for arg in "$@"; do

@@ -22,6 +22,7 @@ rsync -avzR "${mode[@]}" -e "ssh ${AZ_SSH_OPTS:-}" \
     --exclude='postProcessing/' \
     --exclude='/studies/*/smoke/' \
     --exclude='/studies/*/results/' \
+    --exclude='/studies/*/kalibratie/' \
     --exclude='/studies/*/job*.sbatch' \
     --exclude='/studies/*/case/[1-9]*/' \
     --exclude='/studies/*/case/0.[0-9]*/' \
