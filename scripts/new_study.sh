@@ -28,6 +28,7 @@ target=$REPO_ROOT/studies/$number-$name
 
 cp -r "$REPO_ROOT/template" "$target"
 rm -f "$target/case/.gitkeep"
+touch "$target/case/case.foam"
 sed -i "s|^titel: \"\"|titel: \"$name\"|" "$target/case.yaml"
 
 if [ -n "$tutorial" ]; then

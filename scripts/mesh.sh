@@ -6,6 +6,7 @@ set -euo pipefail
 source "$(dirname "$0")/env.sh"
 resolve_study "${1:-}"
 cd "$CASE_DIR"
+touch case.foam
 
 steps=()
 while IFS= read -r line; do

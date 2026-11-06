@@ -14,6 +14,7 @@ n=${n:-100}
 smoke=$STUDY_DIR/smoke
 rm -rf "$smoke"
 mkdir "$smoke"
+touch "$smoke/smoke.foam"
 cp -r "$CASE_DIR/constant" "$CASE_DIR/system" "$smoke/"
 if [ -d "$CASE_DIR/0" ]; then
     cp -r "$CASE_DIR/0" "$smoke/"

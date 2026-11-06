@@ -8,6 +8,8 @@ packages:
   - libgl1-mesa-dri
   - python3-numpy
   - python3-matplotlib
+  - build-essential
+  - flex
 
 write_files:
   - path: /usr/local/bin/setup-slurm.sh

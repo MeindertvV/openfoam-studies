@@ -1,0 +1,62 @@
+# Specificatie van de studie. Vul alles in voordat de case wordt aangepast.
+titel: "acc-5x6"
+doel: "5x6-grid: windstil, met wind, met wind en windschermen. Vergelijking per fan: debiet, inlaattemperatuur, totale warmte."
+
+fysica:
+  stroming: compressibel        # perfectGas, drijfkracht meegenomen
+  tijd: stationair              # pseudo-stationair met lokale tijdstap
+  turbulentiemodel: kEpsilon
+  solver: fluid
+
+geometrie:
+  beschrijving: "30 units uit studie 001 op ~4 miljoen cellen (bundel 0,75 m dik, cel 0,375 m). Domein 600x480x240 m, wind langs +x."
+  meshmethode: snappyHexMesh
+  mesh_stappen: ["python3 mkGeometry.py", "blockMesh", "surfaceFeatures", "snappyHexMesh -overwrite", "topoSet"]
+
+randvoorwaarden:
+  windstil: {inlet, outlet, sides, top: open zoals studie 001}
+  wind: {inlet: atmBoundaryLayer, outlet: open, sides en top: slip}
+
+fan:                            # aannames, generiek
+  curve: "dp = 250*(1-(Q/800)^2) Pa, Q in m3/s"
+  ontwerp: "Q ~ 500 m3/s, dp ~ 150 Pa"
+  swirl: "Euler, Omega 7 rad/s"
+
+warmte:
+  Tstoom: 323                   # K
+  Tlucht: 288                   # K
+  htc_Av: 8100                  # W/m3/K, gekalibreerd op ~12 MW per fan
+
+bundel:
+  f_normaal: 84                 # 1/m, gekalibreerd op gemeten drukval
+  f_dwars: 840                  # 1/m
+  dikte: 0.5                    # m, verdikt van ~0,22 m
+
+stofeigenschappen:
+  nu: 1.47e-5                   # m2/s
+  rho: 1.21                     # kg/m3 bij 288 K en 1 bar, perfectGas
+
+looptijd:
+  endTime: 1500
+  deltaT: 1
+  smoke_iteraties: 20
+
+output:
+  forces: []                    # patches
+  # eigen: fan Q en dp staan in de log
+  probes: []                    # punten
+  velden: [U, p, p_rgh, T]
+
+mesh_drempels:
+  maxNonOrtho: 70               # graden, standaardgrens van checkMesh
+  maxSkewness: 4                # standaardgrens van checkMesh
+  doel_yPlus: null              # controleren na de run, niet in check_mesh.py
+
+convergentie: "Totaal fan-debiet en warmte stabiel binnen 1% over 200 iteraties"
+acceptatie: "Totale warmtebalans binnen 2%; drie cases vergelijkbaar op dezelfde mesh."
+
+rekenplek:
+  plek: azure
+  cores: 16
+  nodes: 1
+  walltime: "05:00:00"

@@ -1,0 +1,233 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      fvModels;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Bundels: DarcyForchheimer met alleen het kwadratische deel.
+// dp = 0.5*rho*f*t*U^2 op de cel-U. In de run is de drukval lager dan deze
+// formule (factor ~0.6) omdat de cel-U achterblijft bij de flux over 2-3 cellen
+// (zie NOTES); f is gekalibreerd op de gemeten drukval en dus meshafhankelijk.
+// e1 = bundelnormaal; dwars op de normaal 10x zo hoog.
+
+porousL
+{
+    type            explicitPorositySource;
+
+    explicitPorositySourceCoeffs
+    {
+        cellZone        bundleL;
+
+        type            DarcyForchheimer;
+
+        d   (0 0 0);
+        f   (56 560 560);
+
+        coordinateSystem
+        {
+            type    cartesian;
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e1      (0.866025 0 -0.5);
+                e3      (0 1 0);
+            }
+        }
+    }
+}
+
+porousR
+{
+    $porousL;
+
+    explicitPorositySourceCoeffs
+    {
+        $../porousL/explicitPorositySourceCoeffs;
+
+        cellZone        bundleR;
+
+        coordinateSystem
+        {
+            type    cartesian;
+            origin  (0 0 0);
+            coordinateRotation
+            {
+                type    axesRotation;
+                e1      (0.866025 0 0.5);
+                e3      (0 1 0);
+            }
+        }
+    }
+}
+
+// Condensatie: stoomzijde op vaste temperatuur, Q = htc*Av*(Ta - T) per m3.
+// htc*Av = 8100 W/m3/K, gekalibreerd op ~12 MW bij 500 m3/s.
+
+heatL
+{
+    type            heatTransfer;
+
+    select          cellZone;
+    cellZone        bundleL;
+
+    semiImplicit    yes;
+
+    Ta              323;
+
+    Av              100;
+
+    heatTransferCoefficientModel constant;
+
+    htc             54;
+}
+
+heatR
+{
+    $heatL;
+
+    cellZone        bundleR;
+}
+
+// Fan: ronde drukverhoging met swirl, per fan in de lijst `fans`.
+// dp(Q) = dp0*(1 - (Q/Qmax)^2); axiale kracht dp/t.
+// Swirl volgt uit Euler: Vtheta = dp/(rho*Omega*r), dus krachtdichtheid
+// Uz*dp/(Omega*r*t), zodat koppel*Omega = dp*Q.
+// dp is onderrelaxeerd (dpRelax): dat is ook de opstart vanuit stilstand.
+
+fan
+{
+    type            coded;
+
+    select          all;
+
+    field           U;
+
+    codeInclude
+    #{
+        #include "fvcReconstruct.H"
+    #};
+
+    codeAddRhoSup
+    #{
+        const label nx = 5, ny = 6;
+        const scalar pitch = 12.6;
+        const scalar R = 4.55, rHub = 1.5;
+        const scalar zLow = 44.25, zHigh = 45.0;
+        const scalar dp0 = 250, Qmax = 800, Omega = 7.0;
+        const scalar dpRelax = 0.1;
+
+        const label nFan = nx*ny;
+        const vector ez(0, 0, 1);
+        const scalar area = constant::mathematical::pi*(sqr(R) - sqr(rHub));
+        const vectorField& C = mesh().C();
+        const scalarField& V = mesh().V();
+        vectorField& Su = eqn.source();
+
+        static scalarList dpOld(nFan, scalar(0));
+        static List<DynamicList<label>> fanCells(nFan);
+        static List<vector> centres(nFan);
+        static bool mapped = false;
+
+        if (!mapped)
+        {
+            for (label i = 0; i < nx; i++)
+            {
+                for (label j = 0; j < ny; j++)
+                {
+                    centres[i*ny + j] = vector
+                    (
+                        (i - 0.5*(nx - 1))*pitch,
+                        (j - 0.5*(ny - 1))*pitch,
+                        0
+                    );
+                }
+            }
+
+            forAll(C, celli)
+            {
+                if (C[celli].z() > zLow && C[celli].z() < zHigh)
+                {
+                    const label i = floor(C[celli].x()/pitch + 0.5*nx);
+                    const label j = floor(C[celli].y()/pitch + 0.5*ny);
+
+                    if (i >= 0 && i < nx && j >= 0 && j < ny)
+                    {
+                        vector d = C[celli] - centres[i*ny + j];
+                        d.z() = 0;
+                        const scalar r = mag(d);
+
+                        if (r > rHub && r < R)
+                        {
+                            fanCells[i*ny + j].append(celli);
+                        }
+                    }
+                }
+            }
+
+            mapped = true;
+        }
+
+        // Debiet uit de flux: de cel-U in de krachtzone wijkt ~25% af van de massastroom
+        const surfaceScalarField& phi =
+            mesh().lookupObject<surfaceScalarField>("phi");
+        const volVectorField U(fvc::reconstruct(phi)/rho);
+        const volScalarField& T = mesh().lookupObject<volScalarField>("T");
+        const bool report = mesh().time().timeIndex() % 10 == 0;
+
+        forAll(fanCells, fanI)
+        {
+            const DynamicList<label>& cells = fanCells[fanI];
+            scalar vol = 0, intUz = 0, intT = 0;
+
+            forAll(cells, i)
+            {
+                const label celli = cells[i];
+                vol += V[celli];
+                intUz += V[celli]*U[celli].z();
+                intT += V[celli]*T[celli];
+            }
+
+            reduce(vol, sumOp<scalar>());
+            reduce(intUz, sumOp<scalar>());
+            reduce(intT, sumOp<scalar>());
+
+            const scalar t = vol/area;
+            const scalar Q = intUz/t;
+            const scalar dpCurve = dp0*max(1 - sqr(max(Q, 0)/Qmax), 0);
+            const scalar dp = dpOld[fanI] + dpRelax*(dpCurve - dpOld[fanI]);
+            dpOld[fanI] = dp;
+
+            forAll(cells, i)
+            {
+                const label celli = cells[i];
+                vector d = C[celli] - centres[fanI];
+                d.z() = 0;
+                const scalar r = mag(d);
+                const vector thetaHat = (ez ^ d)/r;
+
+                Su[celli] -= V[celli]*dp/t*ez;
+                Su[celli] -=
+                    V[celli]*max(U[celli].z(), 0)*dp/(Omega*r*t)*thetaHat;
+            }
+
+            if (report)
+            {
+                Info<< "fan " << fanI << " Q = " << Q << " dp = " << dp
+                    << " Tin = " << intT/vol << endl;
+            }
+        }
+    #};
+}
+
+// ************************************************************************* //
