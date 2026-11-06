@@ -8,7 +8,9 @@ from pathlib import Path
 UREF, ZREF, Z0 = 9.0, 45.0, 0.1  # aanname: 9 m/s op dekhoogte, ruwheid 0,1 m
 NRAMP = 100                      # iteraties tot de volle inlaatsnelheid
 K_SCHERM, T_SCHERM = 10.0, 1.5   # aanname: verliescoefficient, dikte in m
-ZSCHERM = (30.0, 44.25)
+EPS_SCHERM = 0.01   # box iets verschoven: celcentra op +-0.75 maken boxToCell anders willekeurig
+ZSCHERM = (5.0, 44.25)
+Z3M, X3M = 9.0, 1.5   # onder z=9: cellen van 3 m met centra op +-1.5; de box mist die, dus een rij apart
 HALF_X, HALF_Y = 31.5, 37.8
 
 base = Path("case")
@@ -31,6 +33,21 @@ RAMP = f"""        type            codedFixedValue;
             const scalarField z(max(patch().Cf().component(vector::Z), scalar(0)));
             const scalarField Ux(s*Uref*log((z + z0)/z0)/log((Zref + z0)/z0));
             operator==(Ux*vector(1, 0, 0));
+        #}};
+"""
+
+
+# ABL-epsilon met nut op de inlaat begrensd via epsilon >= Cmu k^2/nutMax: test in lokaal/wind_nut.
+EPSCAP = f"""        type            codedFixedValue;
+        value           uniform 0.026;
+        name            ablEpsCap;
+        code
+        #{{
+            const scalar z0 = {Z0}, Uref = {UREF}, Zref = {ZREF}, kappa = 0.41, Cmu = 0.09, nutMax = 5;
+            const scalar us = kappa*Uref/log((Zref + z0)/z0);
+            const scalar k = sqr(us)/sqrt(Cmu);
+            const scalarField z(max(patch().Cf().component(vector::Z), scalar(0)));
+            operator==(max(pow3(us)/(kappa*(z + z0)), Cmu*sqr(k)/nutMax));
         #}};
 """
 
@@ -79,7 +96,7 @@ def wind(run):
         "outlet": "        type            inletOutlet;\n        inletValue      uniform 1.2;\n        value           uniform 1.2;\n",
         '"(sides|top)"': slip_grad})
     rand(z / "epsilon", {
-        "inlet": "        type            atmBoundaryLayerInletEpsilon;\n" + ABL,
+        "inlet": EPSCAP,
         "outlet": "        type            inletOutlet;\n        inletValue      uniform 0.012;\n        value           uniform 0.012;\n",
         '"(sides|top)"': slip_grad})
     s = (z / "nut").read_text()
@@ -142,6 +159,7 @@ screen
 """ + s[i:]
     p.write_text(s)
     w = T_SCHERM / 2
+    (w0, w1) = (-w - EPS_SCHERM, w - EPS_SCHERM)
     p = run / "system/topoSetDict"
     s = p.read_text()
     i = s.index("actions\n(")
@@ -152,14 +170,28 @@ screen
         type    cellSet;
         action  new;
         source  boxToCell;
-        box     (-{w} -{HALF_Y} {t0}) ({w} {HALF_Y} {t1});
+        box     ({w0} -{HALF_Y} {t0}) ({w1} {HALF_Y} {t1});
     }}
     {{
         name    screenCells;
         type    cellSet;
         action  add;
         source  boxToCell;
-        box     (-{HALF_X} -{w} {t0}) ({HALF_X} {w} {t1});
+        box     (-{HALF_X} {w0} {t0}) ({HALF_X} {w1} {t1});
+    }}
+    {{
+        name    screenCells;
+        type    cellSet;
+        action  add;
+        source  boxToCell;
+        box     ({-X3M - 0.1} -{HALF_Y} {t0}) ({-X3M + 0.1} {HALF_Y} {Z3M});
+    }}
+    {{
+        name    screenCells;
+        type    cellSet;
+        action  add;
+        source  boxToCell;
+        box     (-{HALF_X} {-X3M - 0.1} {t0}) ({HALF_X} {-X3M + 0.1} {Z3M});
     }}
     {{
         name    screen;
