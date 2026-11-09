@@ -6,10 +6,30 @@ Werkomgeving voor OpenFOAM-studies: kleine tests lokaal in WSL, meshing en runs 
 ## Studies
 | Studie | Inhoud | Stand |
 |---|---|---|
-| [001-acc-aframe](studies/001-acc-aframe/rapport.md) | Enkel A-frame met fan, 229k cellen | Af |
-| [002-acc-5x6](studies/002-acc-5x6/rapport.md) | 5x6 grid, 4M cellen, windstil, wind, scherm | Drie cases af (1200 iteraties, stabiel); warmtebalans wind en scherm 4-5%, boven het criterium van 2% |
+| [000-pitzDaily](studies/000-pitzDaily/rapport.md) | Tutorial, droogtest van de Azure-keten | Af |
+| [001-acc-aframe](studies/001-acc-aframe/rapport.md) | Enkel A-frame met fan, 229k cellen, windstil | Af: 507 m3/s, warmtebalans -1,4% |
+| [002-acc-5x6](studies/002-acc-5x6/rapport.md) | 5x6 grid, 4M cellen: windstil, wind 9 m/s, wind met kruisvormig scherm | Drie cases af, 1200 iteraties zonder ontsporing. Warmtebalans wind en scherm 4-5%, boven het criterium van 2% |
 
-Werkwijze en fixes per studie staan in `NOTES.md`, de runinstellingen in `case/`, `runs/` en `mkRuns.py`. Velden en meshes staan niet in git, maar in de releases (zie het rapport per studie).
+### Uitkomst 002 in het kort
+| | Windstil | Wind | Wind + scherm |
+|---|---|---|---|
+| Totaal debiet (m3/s) | 15.103 | 12.527 (-17%) | 13.324 (-12%) |
+| Debiet per fan, rij aan de windzijde (m3/s) | 500-506 | 259-334 | 371-392 |
+
+Het scherm haalt een deel van het windverlies terug, vooral in de eerste rij. De scherm-K (10) is een aanname, en de convergentie is niet volledig aangetoond. Zie het rapport.
+
+### Volgende stap
+- 002: warmtebalans onder 2% krijgen en K van het scherm variëren.
+
+## Data en ParaView
+Werkwijze en fixes per studie staan in `NOTES.md`, de runinstellingen in `case/`, `runs/` en `mkRuns.py`. Velden en meshes staan niet in git, maar in de releases:
+
+| Release | Inhoud |
+|---|---|
+| [data-5x6-v1](https://github.com/MeindertvV/openfoam-studies/releases/tag/data-5x6-v1) | 002 windstil (t=1000) en oude wind (t=300, niet geconvergeerd) |
+| [data-5x6-v2](https://github.com/MeindertvV/openfoam-studies/releases/tag/data-5x6-v2) | 002 wind_v2 en scherm_v2 (t=1200), met mesh |
+
+Uitpakken staat in het rapport per studie. Open daarna het `.foam`-bestand van de run met Case Type: Reconstructed Case. Poreuze zones, zoals de bundels en het scherm, zie je pas na **Read Zones** (tandwiel in Properties) en het aanvinken onder Mesh Regions.
 
 ## Installatie
 ```bash
@@ -18,7 +38,7 @@ uv venv .venv --python 3.10
 uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
-Azure eenmalig: inloggen met `~/.local/bin/az login --tenant <directory>.onmicrosoft.com --use-device-code`. Zonder `--tenant` vindt een persoonlijk account geen abonnement.
+Azure eenmalig: inloggen met `~/.local/bin/az login --tenant <directory>.onmicrosoft.com --use-device-code`. Zonder `--tenant` vindt een persoonlijk account geen abonnement. `az` en `gh` staan in `~/.local/bin`, niet op PATH.
 
 ## Nieuwe studie
 ```bash
@@ -36,6 +56,8 @@ Vraag Claude: "gebruik de azure-submit-skill". Claude noemt eerst VM-type, uren 
 5. `scripts/az_down.sh` verwijdert alles, zodat er tussen jobs geen kosten zijn.
 
 Data op de VM verdwijnt met de VM. Vraag vooraf om `--full` als je de tijdmappen wilt bewaren.
+
+Regio en quota: standaard `swedencentral`, maar daar is het quotum 10 vCPU. Voor 16 kernen of meer gebruik je `--region westeurope` (64 vCPU). Een F16as_v6 kost daar ongeveer €1,19 per uur; een run van 1200 iteraties op 4M cellen duurt ongeveer 70 minuten.
 
 ## Scripts
 | Script | Doel |
