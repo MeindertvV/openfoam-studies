@@ -7,9 +7,9 @@ Werkomgeving voor OpenFOAM-studies: kleine tests lokaal in WSL, meshing en runs 
 | Studie | Inhoud | Stand |
 |---|---|---|
 | [001-acc-aframe](studies/001-acc-aframe/rapport.md) | Enkel A-frame met fan, 229k cellen | Af |
-| [002-acc-5x6](studies/002-acc-5x6/rapport.md) | 5x6 grid, 4M cellen, windstil, wind, scherm | Windstil af; wind en scherm niet stabiel |
+| [002-acc-5x6](studies/002-acc-5x6/rapport.md) | 5x6 grid, 4M cellen, windstil, wind, scherm | Drie cases af (1200 iteraties, stabiel); warmtebalans wind en scherm 4-5%, boven het criterium van 2% |
 
-Werkwijze en fixes per studie staan in `NOTES.md`, de runinstellingen in `case/`, `runs/` en `mkRuns.py`. Velden en meshes staan niet in git.
+Werkwijze en fixes per studie staan in `NOTES.md`, de runinstellingen in `case/`, `runs/` en `mkRuns.py`. Velden en meshes staan niet in git, maar in de releases (zie het rapport per studie).
 
 ## Installatie
 ```bash
